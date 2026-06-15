@@ -19,9 +19,8 @@ function generateToken(user) {
       fullname: user.fullname,
       expires: Date.now() + 24 * 60 * 60 * 1000 // 24 Hours validity
     });
-    // Use sha256 to hash the key to exactly 32 bytes for aes-256
     const key = crypto.createHash('sha256').update(TOKEN_SECRET).digest();
-    const iv = Buffer.alloc(16, 0); // Static IV for simplicity
+    const iv = Buffer.alloc(16, 0);
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let token = cipher.update(payload, 'utf8', 'hex');
     token += cipher.final('hex');
@@ -74,9 +73,27 @@ function requireAdmin(req, res, next) {
   });
 }
 
-// Middleware
+// Middleware: Lazy database initialization
+let dbInitialized = false;
+async function ensureDbInitialized(req, res, next) {
+  if (!dbInitialized) {
+    try {
+      await db.initializeDatabase();
+      dbInitialized = true;
+    } catch (error) {
+      console.error('Lazy database initialization failed:', error);
+      return res.status(500).json({ 
+        error: 'Database connection failed. Please ensure the DATABASE_URL environment variable is configured correctly on Vercel.' 
+      });
+    }
+  }
+  next();
+}
+
+// Middleware setup
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/api', ensureDbInitialized); // Apply DB auto-connection middleware to all API calls
 
 
 // ---------------- AUTHENTICATION API ----------------
@@ -126,7 +143,6 @@ app.post('/api/auth/register', requireAdmin, async (req, res) => {
   }
 
   try {
-    // Check if username already exists
     const checkUser = await db.query('SELECT username FROM users WHERE username = $1', [username.trim().toLowerCase()]);
     if (checkUser.rows.length > 0) {
       return res.status(409).json({ error: 'Tên đăng nhập này đã tồn tại' });
@@ -218,7 +234,6 @@ app.post('/api/checklists/reset', async (req, res) => {
 // Get the last performer's name
 app.get('/api/checklists/last-performer', async (req, res) => {
   try {
-    // Check both clinical and ksnk performer fields to get the most recent active name
     const result = await db.query(`
       SELECT performer FROM (
         SELECT performer, completed_at FROM checklist_progress WHERE performer IS NOT NULL AND performer != ''
@@ -342,44 +357,37 @@ app.post('/api/history', async (req, res) => {
 // Get aggregated stats for the admin panel (Admin only)
 app.get('/api/admin/stats', requireAdmin, async (req, res) => {
   try {
-    // 1. Total users
     const usersRes = await db.query('SELECT COUNT(*) FROM users');
     const totalUsers = parseInt(usersRes.rows[0].count);
 
-    // 2. Total clinical checked items
     const clinicalCheckedRes = await db.query('SELECT COUNT(*) FROM checklist_progress WHERE checked = true');
     const clinicalChecks = parseInt(clinicalCheckedRes.rows[0].count);
 
-    // 3. Total KSNK checked items
     const ksnkCheckedRes = await db.query('SELECT COUNT(*) FROM ksnk_progress WHERE checked = true');
     const ksnkChecks = parseInt(ksnkCheckedRes.rows[0].count);
 
-    // 4. Total risk calculations count
     const historyRes = await db.query('SELECT COUNT(*) FROM calculation_history');
     const totalCalculations = parseInt(historyRes.rows[0].count);
 
-    // 5. Grouped calculators counts for round chart
     const calculatorsDistributionRes = await db.query(`
       SELECT score_type as type, COUNT(*) as count 
       FROM calculation_history 
       GROUP BY score_type
     `);
 
-    // 6. Checked count per checklist in KSNK for performance bar chart
-    const ksnkDetailsRes = await db.query(`
+    const ksnkDistributionRes = await db.query(`
       SELECT checklist_id as id, COUNT(*) as count 
       FROM ksnk_progress 
       WHERE checked = true 
       GROUP BY checklist_id
     `);
 
-    // 7. Combined audit log timeline
     const logsRes = await db.query(`
       SELECT checklist_id, item_id, completed_at, performer, 'clinical' as type FROM checklist_progress WHERE checked = true
       UNION ALL
       SELECT checklist_id, item_id, completed_at, performer, 'ksnk' as type FROM ksnk_progress WHERE checked = true
       UNION ALL
-      SELECT score_type as checklist_id, '' as item_id, calculated_at as completed_at, 'Kíp lâm nghiệp' as performer, 'calc' as type FROM calculation_history
+      SELECT score_type as checklist_id, '' as item_id, calculated_at as completed_at, 'Hệ thống' as performer, 'calc' as type FROM calculation_history
       ORDER BY completed_at DESC 
       LIMIT 15
     `);
@@ -392,7 +400,7 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
         totalCalculations
       },
       calculatorsDistribution: calculatorsDistributionRes.rows,
-      ksnkDistribution: ksnkDetailsRes.rows,
+      ksnkDistribution: ksnkDistributionRes.rows,
       auditLog: logsRes.rows
     });
   } catch (error) {
@@ -402,21 +410,15 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
 });
 
 
-// Start server
-async function start() {
-  try {
-    await db.initializeDatabase();
-    
-    app.listen(PORT, () => {
-      console.log(`=======================================================`);
-      console.log(`  Clinical Management Server started on port ${PORT}`);
-      console.log(`  Access URL: http://localhost:${PORT}`);
-      console.log(`=======================================================`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
+// Start server locally (only if not running on Vercel Serverless environment)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(`  Clinical Management Server started locally on port ${PORT}`);
+    console.log(`  Access URL: http://localhost:${PORT}`);
+    console.log(`=======================================================`);
+  });
 }
 
-start();
+// Export app for Vercel
+module.exports = app;

@@ -5,16 +5,15 @@ require('dotenv').config();
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
-  console.error("FATAL ERROR: DATABASE_URL environment variable is not defined in .env!");
-  process.exit(1);
+  console.warn("WARNING: DATABASE_URL environment variable is not defined! Database operations will fail until it is configured.");
 }
 
-const pool = new Pool({
+const pool = connectionString ? new Pool({
   connectionString,
   ssl: {
     rejectUnauthorized: false
   }
-});
+}) : null;
 
 // Helper function to hash password
 function hashPassword(password) {
@@ -23,6 +22,10 @@ function hashPassword(password) {
 
 // Initialize database tables
 async function initializeDatabase() {
+  if (!pool) {
+    throw new Error("DATABASE_URL is missing. Please configure it in your environment variables.");
+  }
+
   const client = await pool.connect();
   try {
     console.log("Database connection successful. Verifying tables...");
@@ -37,9 +40,8 @@ async function initializeDatabase() {
         role VARCHAR(20) NOT NULL DEFAULT 'staff'
       );
     `);
-    console.log("Table 'users' verified.");
 
-    // Create checklist_progress table (Clinical Checklists)
+    // Create checklist_progress table
     await client.query(`
       CREATE TABLE IF NOT EXISTS checklist_progress (
         checklist_id VARCHAR(50) NOT NULL,
@@ -50,9 +52,8 @@ async function initializeDatabase() {
         PRIMARY KEY (checklist_id, item_id)
       );
     `);
-    console.log("Table 'checklist_progress' verified.");
 
-    // Create ksnk_progress table (Infection Control Checklists)
+    // Create ksnk_progress table
     await client.query(`
       CREATE TABLE IF NOT EXISTS ksnk_progress (
         checklist_id VARCHAR(50) NOT NULL,
@@ -63,9 +64,8 @@ async function initializeDatabase() {
         PRIMARY KEY (checklist_id, item_id)
       );
     `);
-    console.log("Table 'ksnk_progress' verified.");
 
-    // Create calculation_history table (Clinical Calculations)
+    // Create calculation_history table
     await client.query(`
       CREATE TABLE IF NOT EXISTS calculation_history (
         id SERIAL PRIMARY KEY,
@@ -76,13 +76,10 @@ async function initializeDatabase() {
         result_summary TEXT NOT NULL
       );
     `);
-    console.log("Table 'calculation_history' verified.");
     
     // Seed default users if table is empty
     const usersCount = await client.query("SELECT COUNT(*) FROM users");
     if (parseInt(usersCount.rows[0].count) === 0) {
-      console.log("Users table is empty. Seeding default accounts...");
-      
       const adminHash = hashPassword("admin123");
       const staffHash = hashPassword("nhanvien123");
       
@@ -91,8 +88,6 @@ async function initializeDatabase() {
         ('admin', $1, 'Quản trị viên Hệ thống', 'admin'),
         ('nhanvien', $2, 'Nhân viên Y tế - Staff', 'staff')
       `, [adminHash, staffHash]);
-      
-      console.log("Default users seeded successfully (admin/admin123, nhanvien/nhanvien123).");
     }
     
     console.log("Database initialization completed successfully.");
@@ -107,6 +102,9 @@ async function initializeDatabase() {
 module.exports = {
   pool,
   initializeDatabase,
-  query: (text, params) => pool.query(text, params),
+  query: (text, params) => {
+    if (!pool) throw new Error("DATABASE_URL is not configured!");
+    return pool.query(text, params);
+  },
   hashPassword
 };
