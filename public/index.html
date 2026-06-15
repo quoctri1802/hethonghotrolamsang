@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng Dụng Hỗ Trợ Lâm Sàng & KSNK - TTYT Liên Chiểu</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-['Inter'] min-h-screen flex flex-col">
+
+    <!-- Header (Ẩn khi in ấn) -->
+    <header class="no-print bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-4">
+                <img src="logo.png" alt="Logo TTYT Liên Chiểu" class="h-14 w-14 object-contain">
+                <div>
+                    <h1 class="text-base sm:text-lg font-extrabold text-sky-800 tracking-tight text-center md:text-left uppercase">
+                        Trung tâm Y tế khu vực Liên Chiểu
+                    </h1>
+                    <p class="text-[10px] sm:text-xs font-bold text-emerald-600 tracking-wider text-center md:text-left uppercase">
+                        Hệ thống hỗ trợ lâm sàng & Kiểm soát nhiễm khuẩn
+                    </p>
+                </div>
+            </div>
+
+            <!-- Auth Status & Controls -->
+            <div class="flex items-center gap-3" id="auth-header-container">
+                <!-- Sẽ chèn động trạng thái đăng nhập bằng JS -->
+                <button id="btn-login-trigger" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-user-md"></i>
+                    <span>Đăng nhập</span>
+                </button>
+            </div>
+
+            <!-- Tab Navigation Buttons -->
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200" id="tab-nav">
+                <button id="tab-btn-checklist" class="tab-btn active px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Checklist Lâm sàng</span>
+                </button>
+                <button id="tab-btn-ksnk" class="tab-btn px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-virus-covid"></i>
+                    <span>Kiểm soát Nhiễm khuẩn</span>
+                </button>
+                <button id="tab-btn-calculator" class="tab-btn px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Tính Điểm nguy cơ</span>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- SECTION 1: TAB CHECKLIST LÂM SÀNG -->
+        <section id="section-checklist" class="tab-content active-content transition-opacity duration-300">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Sidebar chọn Checklist (Ẩn khi in) -->
+                <div class="no-print lg:col-span-1 flex flex-col gap-4">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                        <h2 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-4">Danh sách Bảng kiểm</h2>
+                        <div class="flex flex-col gap-2" id="checklist-selector-container">
+                            <button data-checklist="phong_mo" class="checklist-select-btn active w-full text-left px-4 py-3 rounded-xl font-bold text-xs transition-all flex items-center justify-between">
+                                <span>1. Phòng mổ (WHO)</span>
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
+                            <button data-checklist="sbar" class="checklist-select-btn w-full text-left px-4 py-3 rounded-xl font-bold text-xs transition-all flex items-center justify-between">
+                                <span>2. Bàn giao SBAR</span>
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
+                            <button data-checklist="truoc_phau_thuat" class="checklist-select-btn w-full text-left px-4 py-3 rounded-xl font-bold text-xs transition-all flex items-center justify-between">
+                                <span>3. Trước phẫu thuật</span>
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-tr from-sky-50 to-indigo-50 border border-sky-100 rounded-2xl p-5 shadow-sm">
+                        <div class="flex items-center gap-2 mb-3 text-sky-800 font-bold text-xs">
+                            <i class="fa-solid fa-circle-info text-sky-600"></i>
+                            <span>Hướng dẫn quy trình</span>
+                        </div>
+                        <p class="text-xxs text-sky-700 leading-relaxed">
+                            Bảng kiểm lâm sàng giúp chuẩn hóa quy trình, giảm thiểu sai sót y khoa. Vui lòng đăng nhập để hệ thống tự động ghi nhận tên người làm.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Nội dung Checklist chi tiết -->
+                <div class="lg:col-span-3 flex flex-col gap-6" id="checklist-detail-panel">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col gap-4 relative">
+                        
+                        <!-- Header in ấn -->
+                        <div class="print-only mb-6 border-b-2 border-slate-800 pb-4 flex items-center gap-6">
+                            <img src="logo.png" alt="Logo" class="h-16 w-16">
+                            <div>
+                                <h2 class="text-base font-extrabold text-slate-900 uppercase">Trung tâm Y tế khu vực Liên Chiểu</h2>
+                                <h3 class="text-xs font-bold text-slate-700 uppercase">Biên bản kiểm lâm sàng cá thể</h3>
+                                <p class="text-[10px] text-slate-500">Thời gian in: <span class="current-time-string"></span></p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <span class="no-print bg-sky-50 text-sky-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-sky-200">
+                                    Đang thực hiện
+                                </span>
+                                <h2 id="current-checklist-title" class="text-lg sm:text-xl font-bold text-slate-900 mt-1.5">
+                                    Bảng kiểm Phòng mổ (WHO)
+                                </h2>
+                                <p id="current-checklist-desc" class="text-xxs text-slate-500 mt-1">
+                                    Bảng kiểm an toàn phẫu thuật chuẩn WHO nhằm phòng tránh sự cố y khoa trong phòng mổ.
+                                </p>
+                            </div>
+
+                            <!-- Tác vụ -->
+                            <div class="no-print flex flex-wrap gap-2">
+                                <button id="btn-reset-checklist" class="btn-secondary px-3 py-2 text-[10px] font-bold rounded-lg transition-all flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border border-slate-200">
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                    <span>Reset</span>
+                                </button>
+                                <button id="btn-export-csv" class="btn-secondary px-3 py-2 text-[10px] font-bold rounded-lg transition-all flex items-center gap-1.5 text-slate-700 hover:bg-slate-50 border border-slate-200">
+                                    <i class="fa-solid fa-file-csv text-emerald-600"></i>
+                                    <span>Xuất CSV</span>
+                                </button>
+                                <button id="btn-export-pdf" class="btn-primary px-3 py-2 text-[10px] font-bold rounded-lg transition-all flex items-center gap-1.5 text-white bg-sky-600 hover:bg-sky-700">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                    <span>Xuất PDF</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="no-print mt-1">
+                            <div class="flex items-center justify-between text-xxs font-bold text-slate-500 mb-1">
+                                <span>Tiến độ hoàn thành:</span>
+                                <span id="checklist-progress-text">0/10 mục (0%)</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-1.5">
+                                <div id="checklist-progress-bar" class="bg-gradient-to-r from-sky-500 to-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div id="checklist-items-container" class="mt-4 flex flex-col gap-4">
+                            <!-- Chèn bằng JS -->
+                        </div>
+
+                        <!-- Ký tên khi in -->
+                        <div class="print-only mt-10 grid grid-cols-2 text-center text-xs font-bold">
+                            <div>
+                                <p class="mb-14">Nhân viên thực hiện</p>
+                                <p class="text-slate-400 text-[10px] font-normal">(Ký và ghi rõ họ tên)</p>
+                            </div>
+                            <div>
+                                <p class="mb-14">Trưởng khoa / Kíp trưởng kiểm tra</p>
+                                <p class="text-slate-400 text-[10px] font-normal">(Ký và ghi rõ họ tên)</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: TAB KIỂM SOÁT NHIỄM KHUẨN (MỚI) -->
+        <section id="section-ksnk" class="tab-content transition-opacity duration-300 hidden">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col gap-5">
+                
+                <!-- Print Header -->
+                <div class="print-only mb-6 border-b-2 border-slate-800 pb-4 flex items-center gap-6">
+                    <img src="logo.png" alt="Logo" class="h-16 w-16">
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-900 uppercase">Trung tâm Y tế khu vực Liên Chiểu</h2>
+                        <h3 class="text-xs font-bold text-slate-700 uppercase">Biên bản giám sát kiểm soát nhiễm khuẩn (KSNK)</h3>
+                        <p class="text-[10px] text-slate-500">Thời gian in: <span class="current-time-string"></span></p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="no-print bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-indigo-200">
+                            Y tế dự phòng & Giám sát nội viện
+                        </span>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-900 mt-1.5">
+                            Kiểm Soát Nhiễm Khuẩn (KSNK)
+                        </h2>
+                        <p class="text-xxs text-slate-500 mt-1">
+                            Bảng kiểm định kỳ phòng ngừa lây nhiễm chéo, bảo vệ an toàn cho nhân viên y tế và người bệnh.
+                        </p>
+                    </div>
+
+                    <!-- Tác vụ KSNK -->
+                    <div class="no-print flex flex-wrap gap-2">
+                        <button id="btn-reset-ksnk" class="btn-secondary px-3 py-2 text-[10px] font-bold rounded-lg transition-all flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border border-slate-200">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Reset bảng đang chọn</span>
+                        </button>
+                        <button id="btn-export-ksnk-csv" class="btn-secondary px-3 py-2 text-[10px] font-bold rounded-lg transition-all flex items-center gap-1.5 text-slate-700 hover:bg-slate-50 border border-slate-200">
+                            <i class="fa-solid fa-file-csv text-indigo-600"></i>
+                            <span>Xuất báo cáo KSNK (CSV)</span>
+                        </button>
+                        <button id="btn-export-ksnk-pdf" class="btn-primary px-3 py-2 text-[10px] font-bold rounded-lg transition-all flex items-center gap-1.5 text-white bg-indigo-600 hover:bg-indigo-700">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <span>Xuất PDF / In</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Accordion/Expandable Panels for KSNK -->
+                <div class="mt-4 flex flex-col gap-4" id="ksnk-accordions-container">
+                    <!-- Sẽ dựng động các Panel checklist KSNK bằng JS -->
+                </div>
+
+                <!-- Ký tên khi in -->
+                <div class="print-only mt-12 grid grid-cols-2 text-center text-xs font-bold">
+                    <div>
+                        <p class="mb-14">Cán bộ kiểm tra KSNK</p>
+                        <p class="text-slate-400 text-[10px] font-normal">(Ký và ghi rõ họ tên)</p>
+                    </div>
+                    <div>
+                        <p class="mb-14">Đại diện khoa phòng được kiểm tra</p>
+                        <p class="text-slate-400 text-[10px] font-normal">(Ký và ghi rõ họ tên)</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 3: TAB MÁY TÍNH ĐIỂM NGUY CƠ -->
+        <section id="section-calculator" class="tab-content transition-opacity duration-300 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Cột Nhập liệu & Tính toán -->
+                <div class="lg:col-span-2 flex flex-col gap-6">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-5">
+                            <div class="h-10 w-10 bg-sky-50 rounded-xl flex items-center justify-center text-sky-600 text-lg">
+                                <i class="fa-solid fa-stethoscope"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900">Tính Toán Điểm Lâm Sàng</h2>
+                                <p class="text-xxs text-slate-500">Lựa chọn thang điểm nguy cơ cập nhật và chính xác</p>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Chọn Thang Điểm nâng cấp -->
+                        <div class="mb-6">
+                            <label for="score-select" class="block text-xxs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                                Chọn Thang Điểm Đánh Giá
+                            </label>
+                            <div class="relative">
+                                <select id="score-select" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 appearance-none transition-all duration-200">
+                                    <option value="cha2ds2_vasc">CHA2DS2-VASc (Đánh giá nguy cơ đột quỵ - Rung nhĩ)</option>
+                                    <option value="has_bled">HAS-BLED (Đánh giá nguy cơ chảy máu - Rung nhĩ)</option>
+                                    <option value="spesi">Simplified PESI (Tiên lượng thuyên tắc phổi cấp)</option>
+                                    <option value="qsofa">qSOFA (Nhận diện nhiễm khuẩn huyết ngoài ICU)</option>
+                                    <option value="sofa">SOFA (Đánh giá mức độ suy đa tạng - ICU)</option>
+                                    <option value="apgar">APGAR (Đánh giá sức khỏe trẻ sơ sinh 1 và 5 phút)</option>
+                                    <option value="curb65">CURB-65 (Đánh giá độ nặng viêm phổi cộng đồng)</option>
+                                    <option value="mews">MEWS (Thang cảnh báo sớm suy sụp nội viện)</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form nhập tham số động -->
+                        <form id="calculator-form" class="space-y-6">
+                            <div id="calculator-inputs-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Chèn động bằng JS -->
+                            </div>
+
+                            <div class="border-t border-slate-100 pt-5 flex items-center justify-between gap-4">
+                                <button type="reset" id="btn-reset-calculator" class="px-4 py-2 text-xs font-semibold rounded-xl text-slate-500 hover:bg-slate-100 transition-all">
+                                    Xóa nhập liệu
+                                </button>
+                                <button type="submit" class="px-5 py-3 bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5">
+                                    <i class="fa-solid fa-calculator"></i>
+                                    <span>Tính Điểm & Lưu lịch sử</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Kết quả -->
+                    <div id="calculator-result-panel" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hidden transition-all duration-300">
+                        <h3 class="text-xxs font-bold text-slate-400 uppercase tracking-wider mb-4">Kết Quả Đánh Giá</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                            
+                            <div class="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div id="result-score-circle" class="w-20 h-20 rounded-full flex flex-col items-center justify-center border-4 border-slate-200 shadow-inner">
+                                    <span id="result-score-value" class="text-2xl font-black text-slate-800">0</span>
+                                    <span id="result-score-max" class="text-xxs font-bold text-slate-400 uppercase">Điểm</span>
+                                </div>
+                                <span id="result-risk-badge" class="mt-3.5 px-3 py-1 text-[10px] font-bold rounded-full text-center tracking-wider uppercase">
+                                    Chưa xác định
+                                </span>
+                            </div>
+
+                            <div class="md:col-span-2 flex flex-col gap-3">
+                                <div>
+                                    <h4 class="text-xxs font-bold text-slate-400 uppercase tracking-wide">Phân loại nguy cơ</h4>
+                                    <p id="result-risk-level" class="text-sm font-bold text-slate-800 mt-0.5">Vui lòng tính điểm.</p>
+                                </div>
+                                <div class="border-t border-slate-100 pt-3">
+                                    <h4 class="text-xxs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5 text-emerald-600">
+                                        <i class="fa-solid fa-notes-medical"></i>
+                                        <span>Khuyến cáo thực hành y khoa</span>
+                                    </h4>
+                                    <p id="result-recommendation" class="text-xs text-slate-600 mt-1 leading-relaxed bg-emerald-50/50 border border-emerald-100/50 p-3 rounded-xl">
+                                        Vui lòng tính điểm để nhận khuyến cáo.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lịch sử -->
+                <div class="lg:col-span-1 flex flex-col gap-6">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col h-full">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left text-slate-400 text-sm"></i>
+                                <h3 class="text-xs font-bold text-slate-800">Lịch sử đánh giá</h3>
+                            </div>
+                            <button id="btn-export-history-csv" class="text-xxs text-sky-600 hover:text-sky-700 font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Tải CSV</span>
+                            </button>
+                        </div>
+
+                        <div id="history-list-container" class="flex-grow overflow-y-auto space-y-3 pr-1 max-h-[500px]">
+                            <!-- Chèn bằng JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Đăng nhập (no-print) -->
+    <div id="login-modal" class="no-print fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 w-full max-w-sm mx-4 shadow-xl transform scale-95 transition-transform duration-300 flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-sm font-extrabold text-sky-800 uppercase tracking-wide">Nhân viên y tế đăng nhập</h3>
+                <button id="btn-login-close" class="text-slate-400 hover:text-slate-600 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xxs font-bold text-slate-400 uppercase mb-1">Tên đăng nhập</label>
+                    <input type="text" id="login-username" required placeholder="Nhập tên đăng nhập..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-sky-500">
+                </div>
+                <div>
+                    <label class="block text-xxs font-bold text-slate-400 uppercase mb-1">Mật khẩu</label>
+                    <input type="password" id="login-password" required placeholder="Nhập mật khẩu..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-sky-500">
+                </div>
+                <div id="login-error-msg" class="text-rose-600 text-xxs font-bold hidden">
+                    Sai tài khoản hoặc mật khẩu! Vui lòng kiểm tra lại.
+                </div>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+                    Xác nhận Đăng Nhập
+                </button>
+            </form>
+            <div class="text-[10px] text-slate-400 border-t border-slate-100 pt-3 text-center">
+                Mặc định: admin / admin123 hoặc nhanvien / nhanvien123.
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer (Ẩn khi in) -->
+    <footer class="no-print bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>© 2026 Trung tâm Y tế khu vực Liên Chiểu. Hệ thống quản trị lâm sàng & KSNK an toàn.</p>
+            <p class="flex items-center gap-1.5">
+                <i class="fa-solid fa-circle text-emerald-500 animate-pulse text-[8px]"></i>
+                <span class="font-medium text-slate-500">Hệ thống kết nối trực tuyến bảo mật</span>
+            </p>
+        </div>
+    </footer>
+
+    <!-- JS Logic -->
+    <script src="app.js"></script>
+</body>
+</html>

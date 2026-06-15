@@ -1,0 +1,248 @@
+/* Clinical & Infection Control Custom Stylesheet */
+
+:root {
+  --primary-color: #0284c7; /* Sky 600 */
+  --primary-hover: #0369a1; /* Sky 700 */
+  --accent-color: #059669;  /* Emerald 600 */
+  --accent-hover: #047857;  /* Emerald 700 */
+  --ksnk-color: #4f46e5;    /* Indigo 600 */
+  --ksnk-hover: #4338ca;    /* Indigo 700 */
+  --bg-slate-50: #f8fafc;
+  --border-slate-200: #e2e8f0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-slate-50);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Tab Navigation Buttons */
+.tab-btn {
+  color: #64748b;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tab-btn:hover {
+  color: #334155;
+  background-color: rgba(241, 245, 249, 0.8);
+}
+.tab-btn.active {
+  color: #0369a1;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+#tab-btn-ksnk.active {
+  color: var(--ksnk-color);
+}
+
+/* Sidebar Selectors */
+.checklist-select-btn {
+  background-color: transparent;
+  color: #64748b;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+.checklist-select-btn:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+}
+.checklist-select-btn.active {
+  background-color: #f0f9ff;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+/* Checklist Items */
+.checklist-section-title {
+  position: relative;
+  padding-left: 12px;
+}
+.checklist-section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 4px;
+  background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+  border-radius: 2px;
+}
+
+.checklist-row {
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+.checklist-row:hover {
+  background-color: #f8fafc;
+  border-left-color: #bae6fd;
+}
+.checklist-row.checked-row {
+  background-color: #f0fdf4; /* Emerald 50 */
+  border-left-color: #bbf7d0; /* Emerald 200 */
+}
+
+/* KSNK Accordion Styles */
+.ksnk-accordion-header {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.ksnk-accordion-header:hover {
+  background-color: #f8fafc;
+}
+.ksnk-accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+}
+.ksnk-accordion-content.expanded {
+  max-height: 2000px;
+  transition: max-height 0.5s cubic-bezier(1, 0, 1, 0);
+}
+
+/* Custom Checkbox */
+.custom-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #cbd5e1;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: transparent;
+  flex-shrink: 0;
+}
+.custom-checkbox:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+.custom-checkbox.checked {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.custom-checkbox.ksnk-checkbox.checked {
+  background-color: var(--ksnk-color);
+  border-color: var(--ksnk-color);
+}
+
+/* Input Fields */
+.performer-input {
+  border-bottom: 2px solid #e2e8f0;
+  background-color: transparent;
+  transition: all 0.2s ease;
+}
+.performer-input:focus {
+  outline: none;
+  border-bottom-color: var(--primary-color);
+  background-color: #f8fafc;
+}
+
+/* Tab display */
+.tab-content {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+.tab-content.hidden {
+  display: none;
+  opacity: 0;
+}
+
+/* Score Circle indicators */
+.text-xxs {
+  font-size: 0.65rem;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+  
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .lg\:col-span-3, .lg\:col-span-4 {
+    width: 100% !important;
+  }
+  
+  .bg-white {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  
+  /* Print Accordions: Force expansion and print layout */
+  .ksnk-accordion-content {
+    max-height: none !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  
+  .ksnk-accordion-header {
+    border-bottom: 2px solid #000 !important;
+    margin-top: 20px !important;
+    padding: 10px 0 !important;
+  }
+  
+  .checklist-row {
+    page-break-inside: avoid;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 6px 0 !important;
+    background: transparent !important;
+  }
+  
+  .custom-checkbox {
+    border: 1px solid #000 !important;
+    background: transparent !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .custom-checkbox.checked {
+    background-color: #334155 !important;
+    color: white !important;
+  }
+  
+  .performer-input {
+    border-bottom: 1px dashed #000 !important;
+    background: transparent !important;
+    width: 120px !important;
+  }
+}
+
+.print-only {
+  display: none;
+}
